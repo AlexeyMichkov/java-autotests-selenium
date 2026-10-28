@@ -9,7 +9,10 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.autotests.pages.LoginPage;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import io.qameta.allure.*;
 
+@Epic("E-commerce")
+@Feature("Аутентификация")
 public class SauceDemoLoginTest {
 
     WebDriver driver;
@@ -36,6 +39,10 @@ public class SauceDemoLoginTest {
     }
 
     @Test
+    @Story("Успешный вход в систему")
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Проверка успешного логина с валидными учётными данными")
+    @Owner("Alexey Michkov")
     void successfulLoginTest() {
         loginPage.login("standard_user", "secret_sauce");
 
@@ -46,6 +53,10 @@ public class SauceDemoLoginTest {
     }
 
     @Test
+    @Story("Неуспешный вход в систему")
+    @Severity(SeverityLevel.NORMAL)
+    @Description("Проверка обработки заблокированного пользователя")
+    @Owner("Alexey Michkov")
     void failedLoginTest() {
         loginPage.login("locked_out_user", "secret_sauce");
 

@@ -12,7 +12,10 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import io.qameta.allure.*;
 
+@Epic("Обучение")
+@Feature("Продвинутые локаторы")
 public class LocatorsPracticeTest {
 
     WebDriver driver;
@@ -37,6 +40,10 @@ public class LocatorsPracticeTest {
     }
 
     @Test
+    @Story("CSS-селекторы")
+    @Severity(SeverityLevel.MINOR)
+    @Description("Практика CSS-селекторов: поиск по ID, атрибутам, комбинациям")
+    @Owner("Alexey Michkov")
     void cssSelectorsPractice() {
         // Открываем сайт
         driver.get("https://www.saucedemo.com/");
@@ -61,6 +68,10 @@ public class LocatorsPracticeTest {
     }
 
     @Test
+    @Story("XPath")
+    @Severity(SeverityLevel.MINOR)
+    @Description("Практика XPath: поиск по атрибутам, тексту")
+    @Owner("Alexey Michkov")
     void xpathPractice() {
         driver.get("https://www.saucedemo.com/");
 
@@ -81,6 +92,10 @@ public class LocatorsPracticeTest {
     }
 
     @Test
+    @Story("Поиск нескольких элементов")
+    @Severity(SeverityLevel.NORMAL)
+    @Description("Поиск всех кнопок 'Add to cart' и нажатие на третью")
+    @Owner("Alexey Michkov")
     void findMultipleElements() {
         // Логинимся
         driver.get("https://www.saucedemo.com/");
@@ -112,6 +127,10 @@ public class LocatorsPracticeTest {
     }
 
     @Test
+    @Story("Навигация по DOM")
+    @Severity(SeverityLevel.NORMAL)
+    @Description("Навигация по DOM: родители, siblings, атрибуты")
+    @Owner("Alexey Michkov")
     void xpathNavigation() {
         driver.get("https://www.saucedemo.com/");
 

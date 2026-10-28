@@ -12,6 +12,10 @@ import org.autotests.pages.CartPage;
 import org.autotests.pages.CheckoutPage;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import io.qameta.allure.*;
+
+@Epic("E-commerce")
+@Feature("Корзина и оформление заказа")
 
 public class CartTest {
 
@@ -45,6 +49,10 @@ public class CartTest {
     }
 
     @Test
+    @Story("Добавление товара в корзину")
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Проверка добавления товара Sauce Labs Backpack в корзину")
+    @Owner("Alexey Michkov")
     void addToCartTest() {
         // Логин через Page Object
         loginPage.login("standard_user", "secret_sauce");
@@ -60,6 +68,11 @@ public class CartTest {
     }
 
     @Test
+    @Story("Полное оформление заказа")
+    @Severity(SeverityLevel.BLOCKER)
+    @Description("Проверка полного цикла оформления заказа: от добавления товара до подтверждения")
+    @Owner("Alexey Michkov")
+    @Link(name = "Требование", url = "https://saucedemo.com/checkout")
     void fullCheckoutTest() {
         // Логин
         loginPage.login("standard_user", "secret_sauce");

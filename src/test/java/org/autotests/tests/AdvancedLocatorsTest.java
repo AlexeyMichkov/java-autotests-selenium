@@ -9,10 +9,13 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
-import java.util.List;  // ← Импорт для работы со списками элементов
+import java.util.List; // ← Импорт для работы со списками элементов
+import io.qameta.allure.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Epic("Обучение")
+@Feature("Продвинутые локаторы")
 public class AdvancedLocatorsTest {
 
     WebDriver driver;
@@ -46,6 +49,10 @@ public class AdvancedLocatorsTest {
     }
 
     @Test
+    @Story("Поиск товара по названию")
+    @Severity(SeverityLevel.NORMAL)
+    @Description("Поиск товара 'Sauce Labs Onesie' по названию и добавление в корзину")
+    @Owner("Alexey Michkov")
     void advancedLocatorsTest() {
 
         // ============================================
