@@ -1,5 +1,7 @@
 package org.autotests.tests;
 
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.autotests.utils.ScreenshotExtension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,6 +13,7 @@ import org.autotests.pages.LoginPage;
 import static org.assertj.core.api.Assertions.assertThat;
 import io.qameta.allure.*;
 
+@ExtendWith(ScreenshotExtension.class)
 @Epic("E-commerce")
 @Feature("Аутентификация")
 public class SauceDemoLoginTest {
