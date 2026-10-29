@@ -1,7 +1,10 @@
 package org.autotests.pages;
 
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 public class LoginPage {
 
@@ -36,7 +39,17 @@ public class LoginPage {
     }
 
     public String getErrorMessage() {
-        return driver.findElement(errorMessage).getText();
+        try {
+            // Явное ожидание появления элемента (до 5 секунд)
+            WebDriverWait wait = new WebDriverWait(driver, java.time.Duration.ofSeconds(5));
+            WebElement errorElement = wait.until(
+                    org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated(errorMessage)
+            );
+            return errorElement.getText();
+        } catch (Exception e) {
+            System.err.println("⚠️ Не удалось найти элемент ошибки: " + e.getMessage());
+            return ""; // Возвращаем пустую строку, если элемент не найден
+        }
     }
 
     // Удобный метод "логин за один шаг"
