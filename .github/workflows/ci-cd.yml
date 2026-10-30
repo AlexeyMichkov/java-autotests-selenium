@@ -1,0 +1,34 @@
+name: Java CI with Maven and Allure
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build and Test with Maven
+        run: mvn clean test
+
+      - name: Publish Allure Report
+        uses: simple-elf/allure-report-action@v1.8
+        if: always()
+        with:
+          allure_results: target/allure-results
+          gh_pages: gh-pages
+          allure_report: allure-report
+          allure_history: allure-history
