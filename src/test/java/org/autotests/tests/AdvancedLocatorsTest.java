@@ -25,16 +25,24 @@ public class AdvancedLocatorsTest {
 
     @BeforeEach
     void setUp() {
-        // Настройки Chrome (те же, что и раньше — отключаем уведомления и пароли)
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--user-data-dir=C:\\temp\\chrome-profile-" + System.currentTimeMillis());
+
+        // Headless режим
+        options.addArguments("--headless=new");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--window-size=1920,1080");
+
+        // Остальные аргументы
+        options.addArguments("--user-data-dir=C:\\temp\\chrome-profile-param-" + System.currentTimeMillis());
         options.addArguments("--disable-save-password-bubble");
         options.addArguments("--disable-features=PasswordManager,PasswordManagerRedesign");
         options.addArguments("--disable-notifications");
 
         driver = new ChromeDriver(options);
         driver.manage().window().maximize();
-    }
+            }
 
     @AfterEach
     void tearDown() {

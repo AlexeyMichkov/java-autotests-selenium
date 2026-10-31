@@ -2,6 +2,7 @@ package org.autotests.pages;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import java.time.Duration;
@@ -32,13 +33,20 @@ public class CheckoutPage {
     }
 
     public void clickContinue() {
-        driver.findElement(continueButton).click();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+        WebElement button = wait.until(ExpectedConditions.elementToBeClickable(continueButton));
+        button.click();
     }
 
     // Ожидание загрузки страницы Overview
     public void waitForOverviewPage() {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        wait.until(ExpectedConditions.visibilityOfElementLocated(pageTitle));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+
+        // Ждём, пока URL не будет содержать "checkout-step-two" (страница Overview)
+        wait.until(ExpectedConditions.urlContains("checkout-step-two"));
+
+        // И дополнительно ждём, пока заголовок не станет "Checkout: Overview"
+        wait.until(ExpectedConditions.textToBe(pageTitle, "Checkout: Overview"));
     }
 
     public String getPageTitle() {
@@ -50,6 +58,9 @@ public class CheckoutPage {
     }
 
     public String getCompleteHeaderText() {
-        return driver.findElement(completeHeader).getText();
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+            WebElement successHeader = wait.until(ExpectedConditions.visibilityOfElementLocated(completeHeader));
+            return successHeader.getText();
+        }
     }
-}
+

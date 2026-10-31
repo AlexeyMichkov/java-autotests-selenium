@@ -25,7 +25,15 @@ public class ParameterizedLoginTest {
     @BeforeEach
     void setUp() {
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--user-data-dir=C:\\temp\\chrome-profile-param-" + System.currentTimeMillis());
+
+        // Headless режим для GitHub Actions
+        options.addArguments("--headless=new");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--window-size=1920,1080");
+
+        // Остальные аргументы
         options.addArguments("--disable-save-password-bubble");
         options.addArguments("--disable-features=PasswordManager,PasswordManagerRedesign");
         options.addArguments("--disable-notifications");
@@ -60,16 +68,13 @@ public class ParameterizedLoginTest {
         loginPage.login(username, password);
 
         if (expectError) {
-            // Если ожидаем ошибку, проверяем, что мы НЕ попали на страницу товаров
             String currentUrl = driver.getCurrentUrl();
 
             if (currentUrl.contains("inventory.html")) {
-                // Если попали на страницу товаров — значит ошибки не было
                 throw new AssertionError("Ожидалась ошибка для пользователя " + username +
                         ", но произошёл успешный вход!");
             }
 
-            // Пробуем получить сообщение об ошибке (если есть)
             String errorMessage = loginPage.getErrorMessage();
             if (errorMessage.isEmpty()) {
                 System.out.println("ℹ️ Сообщение об ошибке пустое, но мы не на странице товаров — это OK для: " + username);
@@ -77,9 +82,8 @@ public class ParameterizedLoginTest {
                 System.out.println("✅ Ошибка получена: " + errorMessage);
             }
         } else {
-            // Если ошибка не ожидается, проверяем, что попали на страницу товаров
             assertThat(driver.getCurrentUrl()).contains("inventory.html");
             System.out.println("✅ Успешный вход для: " + username);
         }
-}
+    }
 }

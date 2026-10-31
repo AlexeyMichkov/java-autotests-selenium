@@ -28,18 +28,22 @@ public class CartTest {
 
     @BeforeEach
     void setUp() {
-        // Настройки Chrome
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--user-data-dir=C:\\temp\\chrome-profile-" + System.currentTimeMillis());
+
+        // Headless режим
+        options.addArguments("--headless=new");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--window-size=1920,1080");
+
+        // Остальные аргументы
         options.addArguments("--disable-save-password-bubble");
         options.addArguments("--disable-features=PasswordManager,PasswordManagerRedesign");
         options.addArguments("--disable-notifications");
-        options.addArguments("--disable-autofill");
 
         driver = new ChromeDriver(options);
         driver.manage().window().maximize();
-
-        // Создаём объекты страниц
         loginPage = new LoginPage(driver);
         inventoryPage = new InventoryPage(driver);
     }
@@ -92,6 +96,9 @@ public class CartTest {
         // Оформляем заказ
         CheckoutPage checkoutPage = cartPage.goToCheckout();
         checkoutPage.fillInfo("Alexey", "Michkov", "123456");
+        // Добавил паузу между вводом и кликом
+        try { Thread.sleep(6000); } catch (InterruptedException e) {}
+
         checkoutPage.clickContinue();
         checkoutPage.waitForOverviewPage();
         assertThat(checkoutPage.getPageTitle()).isEqualTo("Checkout: Overview");
