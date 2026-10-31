@@ -12,6 +12,10 @@ import org.autotests.pages.LoginPage;
 import org.autotests.pages.InventoryPage;
 import org.autotests.pages.CartPage;
 import org.autotests.pages.CheckoutPage;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.By;
+import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import io.qameta.allure.*;
@@ -83,6 +87,9 @@ public class CartTest {
     void fullCheckoutTest() {
         // Логин
         loginPage.login("standard_user", "secret_sauce");
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("add-to-cart-sauce-labs-backpack")));
 
         // Добавляем два товара
         inventoryPage.addToCartBackpack();
