@@ -1,5 +1,8 @@
 package org.autotests.pages;
 
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import java.time.Duration;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
@@ -29,11 +32,15 @@ public class InventoryPage {
     }
 
     public void addToCartBackpack() {
-        driver.findElement(addToCartBackpack).click();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        wait.until(ExpectedConditions.elementToBeClickable(By.id("add-to-cart-sauce-labs-backpack")));
+        driver.findElement(By.id("add-to-cart-sauce-labs-backpack")).click();
     }
 
     public void addToCartBikeLight() {
-        driver.findElement(addToCartBikeLight).click();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        wait.until(ExpectedConditions.elementToBeClickable(By.id("add-to-cart-sauce-labs-bike-light")));
+        driver.findElement(By.id("add-to-cart-sauce-labs-bike-light")).click();
     }
 
     // Переход в корзину — возвращает объект CartPage
