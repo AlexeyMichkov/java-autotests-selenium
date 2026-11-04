@@ -13,9 +13,14 @@ import org.autotests.pages.LoginPage;
 import static org.assertj.core.api.Assertions.assertThat;
 import io.qameta.allure.*;
 
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
+
 @ExtendWith(ScreenshotExtension.class)
 @Epic("E-commerce")
 @Feature("Аутентификация")
+@Execution(ExecutionMode.SAME_THREAD)
 public class SauceDemoLoginTest {
 
     WebDriver driver;

@@ -19,10 +19,13 @@ import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import io.qameta.allure.*;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 @ExtendWith(ScreenshotExtension.class)
 @Epic("E-commerce")
 @Feature("Корзина и оформление заказа")
+@Execution(ExecutionMode.SAME_THREAD)
 
 public class CartTest {
 

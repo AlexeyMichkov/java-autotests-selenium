@@ -1,36 +1,38 @@
 package org.autotests.tests;
 
 import org.junit.jupiter.api.*;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+// Testcontainers не использован из-за проблем совместимости с Docker Desktop 29.x на Windows
+// import org.testcontainers.containers.PostgreSQLContainer;
+// import org.testcontainers.junit.jupiter.Container;
+// import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.sql.*;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class DatabaseTest {
 
-    // Статический блок ВНУТРИ класса
-    static {
-                // Для Windows: явно указываем стратегию подключения
-        System.setProperty("testcontainers.docker.client.strategy",
-                "org.testcontainers.dockerclient.NpipeSocketClientProviderStrategy");
+    // ⚠️ Testcontainers не заработал на Windows с Docker Desktop 29.x
+// Ошибка: "client version 1.32 is too old. Minimum supported API version is 1.40"
+// Даже с Testcontainers 1.21.3 и docker-java 3.4.1 — не помогло.
+// Перешли на H2 in-memory database для тестов.
+//
+// static {
+//     System.setProperty("testcontainers.docker.client.strategy",
+//             "org.testcontainers.dockerclient.NpipeSocketClientProviderStrategy");
+//     System.setProperty("testcontainers.ryuk.disabled", "true");
+//     System.setProperty("docker.host", "npipe:////./pipe/docker_engine");
+// }
 
-         //Отключаем Ryuk (может вызывать проблемы на Windows)
-        System.setProperty("testcontainers.ryuk.disabled", "true");
+    private Connection connection;
 
-        // Явно указываем Docker host для Windows
-        System.setProperty("docker.host", "npipe:////./pipe/docker_engine");
-    }
-
-    private static Connection connection;
-
-    @BeforeAll
-    static void setUpDatabase() throws SQLException {
-        // Используем H2 in-memory базу с режимом PostgreSQL
-        String jdbcUrl = "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE";
+    @BeforeEach
+    void setUpDatabase() throws SQLException {
+        // Уникальное имя БД для каждого теста
+        String dbName = "testdb_" + UUID.randomUUID().toString().substring(0, 8);
+        String jdbcUrl = "jdbc:h2:mem:" + dbName + ";DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE";
 
         System.out.println("️  Используем H2 базу данных: " + jdbcUrl);
 
@@ -40,7 +42,7 @@ public class DatabaseTest {
         createUsersTable();
     }
 
-    private static void createUsersTable() throws SQLException {
+    private void createUsersTable() throws SQLException {
         String createTableSQL = """
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
@@ -55,8 +57,8 @@ public class DatabaseTest {
         }
     }
 
-    @AfterAll
-    static void tearDown() throws SQLException {
+    @AfterEach
+    void tearDown() throws SQLException {
         if (connection != null && !connection.isClosed()) {
             connection.close();
         }
@@ -92,11 +94,20 @@ public class DatabaseTest {
     @Order(2)
     @DisplayName("Чтение пользователя из БД")
     void testSelectUser() throws SQLException {
+        // Сначала создаём пользователя (не полагаемся на тест 1!)
+        String insertSQL = "INSERT INTO users (username, email) VALUES (?, ?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(insertSQL)) {
+            pstmt.setString(1, "john_doe");
+            pstmt.setString(2, "john@example.com");
+            pstmt.executeUpdate();
+        }
+
+        // Теперь читаем
         String selectSQL = """
-            SELECT id, username, email, created_at
-            FROM users
-            WHERE username = ?
-            """;
+        SELECT id, username, email, created_at
+        FROM users
+        WHERE username = ?
+        """;
 
         try (PreparedStatement pstmt = connection.prepareStatement(selectSQL)) {
             pstmt.setString(1, "john_doe");
@@ -118,11 +129,20 @@ public class DatabaseTest {
     @Order(3)
     @DisplayName("Обновление email пользователя")
     void testUpdateUser() throws SQLException {
+        // Сначала создаём пользователя
+        String insertSQL = "INSERT INTO users (username, email) VALUES (?, ?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(insertSQL)) {
+            pstmt.setString(1, "john_doe");
+            pstmt.setString(2, "john@example.com");
+            pstmt.executeUpdate();
+        }
+
+        // Теперь обновляем
         String updateSQL = """
-            UPDATE users
-            SET email = ?
-            WHERE username = ?
-            """;
+        UPDATE users
+        SET email = ?
+        WHERE username = ?
+        """;
 
         try (PreparedStatement pstmt = connection.prepareStatement(updateSQL)) {
             pstmt.setString(1, "john.new@example.com");
@@ -152,6 +172,15 @@ public class DatabaseTest {
     @Order(4)
     @DisplayName("Удаление пользователя")
     void testDeleteUser() throws SQLException {
+        // Сначала создаём пользователя (не полагаемся на тест 1!)
+        String insertSQL = "INSERT INTO users (username, email) VALUES (?, ?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(insertSQL)) {
+            pstmt.setString(1, "john_doe");
+            pstmt.setString(2, "john@example.com");
+            pstmt.executeUpdate();
+        }
+
+        // Теперь удаляем
         String deleteSQL = "DELETE FROM users WHERE username = ?";
 
         try (PreparedStatement pstmt = connection.prepareStatement(deleteSQL)) {

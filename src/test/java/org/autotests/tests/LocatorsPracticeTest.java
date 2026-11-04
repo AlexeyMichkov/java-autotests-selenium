@@ -15,10 +15,13 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import io.qameta.allure.*;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 @ExtendWith(ScreenshotExtension.class)
 @Epic("Обучение")
 @Feature("Продвинутые локаторы")
+@Execution(ExecutionMode.SAME_THREAD)
 public class LocatorsPracticeTest {
 
     WebDriver driver;
