@@ -138,6 +138,8 @@
                     </argLine>
                     <systemPropertyVariables>
                         <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
+                        <!-- Передаём значение свойства headed в тесты (true/false) -->
+                        <headed>${headed}</headed>
                     </systemPropertyVariables>
                     <!-- Параллельный запуск тестов -->
                     <parallel>classes</parallel>
@@ -164,5 +166,34 @@
             </plugin>
         </plugins>
     </build>
+    <!--
+            Maven профили для переключения режимов запуска браузера.
 
+            - headless (по умолчанию): браузер без видимого окна, быстро, для CI/CD
+            - headed: браузер с видимым окном, для отладки и ручной проверки
+
+            Использование:
+              mvn clean test          → headless режим
+              mvn test -P headed      → headed режим
+        -->
+    <profiles>
+        <!-- Профиль для headless режима (активен по умолчанию) -->
+        <profile>
+            <id>headless</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <headed>false</headed>
+            </properties>
+        </profile>
+
+        <!-- Профиль для headed режима (с видимым браузером) -->
+        <profile>
+            <id>headed</id>
+            <properties>
+                <headed>true</headed>
+            </properties>
+        </profile>
+    </profiles>
 </project>

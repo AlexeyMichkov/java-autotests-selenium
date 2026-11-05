@@ -90,6 +90,13 @@ public class ApiPostsTest {
     // ============================================
     // ТЕСТ 3: Создание нового поста
     // ============================================
+
+    /**
+     * Тест-кейс: TC-003 - Создание нового поста через API
+     *
+     * @see <a href="https://github.com/AlexeyMichkov/java-autotests-selenium/issues/3">
+     *      TC-003 на GitHub</a>
+     */
     @Test
     @Story("Создание нового поста")
     @Severity(SeverityLevel.CRITICAL)

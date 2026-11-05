@@ -33,24 +33,54 @@ public class CartTest {
     LoginPage loginPage;
     InventoryPage inventoryPage;
 
+    /**
+     * Метод инициализации браузера перед каждым тестом.
+     *
+     * Проверяет системное свойство "headed":
+     * - Если headed=true → запускаем браузер в обычном режиме (видимое окно)
+     * - Если headed=false или не задано → запускаем в headless режиме (без окна)
+     *
+     * Headless режим используется по умолчанию для быстрого прогона тестов в CI/CD.
+     * Headed режим удобен для отладки и визуальной проверки.
+     */
     @BeforeEach
     void setUp() {
+        // Создаём объект настроек Chrome
         ChromeOptions options = new ChromeOptions();
 
-        // Headless режим
-        options.addArguments("--headless=new");
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
-        options.addArguments("--disable-gpu");
-        options.addArguments("--window-size=1920,1080");
+        // Проверяем, в каком режиме нужно запустить браузер
+        // Значение по умолчанию — false (headless режим)
+        boolean isHeaded = Boolean.parseBoolean(System.getProperty("headed", "false"));
 
-        // Остальные аргументы
-        options.addArguments("--disable-save-password-bubble");
-        options.addArguments("--disable-features=PasswordManager,PasswordManagerRedesign");
-        options.addArguments("--disable-notifications");
+        if (!isHeaded) {
+            // Headless режим: браузер работает без видимого окна
+            // Это быстрее и подходит для CI/CD пайплайнов
+            options.addArguments("--headless=new");
+            System.out.println("🔹 Запуск в HEADLESS режиме (без видимого окна)");
+        } else {
+            // Headed режим: браузер открывается как обычное окно
+            // Удобно для отладки и ручной проверки
+            System.out.println("🔹 Запуск в HEADED режиме (с видимым окном браузера)");
+        }
 
+        // Обязательные аргументы для стабильной работы Chrome
+        options.addArguments("--no-sandbox");                    // Отключаем песочницу (нужно для Linux/Docker)
+        options.addArguments("--disable-dev-shm-usage");         // Используем /tmp вместо /dev/shm
+        options.addArguments("--disable-gpu");                   // Отключаем GPU-ускорение (для headless)
+        options.addArguments("--window-size=1920,1080");         // Фиксированный размер окна
+
+        // Аргументы для улучшения UX при автоматизации
+        options.addArguments("--disable-save-password-bubble");  // Отключаем предложение сохранить пароль
+        options.addArguments("--disable-features=PasswordManager,PasswordManagerRedesign"); // Отключаем менеджер паролей
+        options.addArguments("--disable-notifications");         // Отключаем уведомления браузера
+
+        // Создаём экземпляр драйвера с указанными настройками
         driver = new ChromeDriver(options);
+
+        // Разворачиваем окно браузера на весь экран
         driver.manage().window().maximize();
+
+        // Инициализируем Page Objects для работы со страницами
         loginPage = new LoginPage(driver);
         inventoryPage = new InventoryPage(driver);
     }
@@ -62,6 +92,12 @@ public class CartTest {
         }
     }
 
+    /**
+     * Тест-кейс: TC-002 - Добавление товара в корзину
+     *
+     * @see <a href="https://github.com/AlexeyMichkov/java-autotests-selenium/issues/2">
+     *      TC-002 на GitHub</a>
+     */
     @Test
     @Story("Добавление товара в корзину")
     @Severity(SeverityLevel.CRITICAL)
