@@ -1,0 +1,47 @@
+# Название нашего пайплайна (отображается на GitHub)
+name: Java CI with Maven
+
+# Триггеры: когда запускать этот пайплайн
+on:
+  push:
+    branches: [ "main" ]        # Запускать при пуше в main
+  pull_request:
+    branches: [ "main" ]        # Запускать при создании PR в main
+
+# Задачи (Jobs), которые будут выполнены
+jobs:
+  build-and-test:
+    # Используем последнюю версию Ubuntu (стандарт для CI/CD)
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Скачиваем код репозитория на виртуальную машину
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Устанавливаем Java 17 (так как в pom.xml указан 17)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # 3. Кэшируем зависимости Maven для скорости
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      # 4. Запускаем тесты в headless режиме
+      - name: Run tests with Maven
+        run: mvn clean test -B
+
+      # 5. Сохраняем логи, если тесты упали
+      - name: Upload test results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: target/surefire-reports/
