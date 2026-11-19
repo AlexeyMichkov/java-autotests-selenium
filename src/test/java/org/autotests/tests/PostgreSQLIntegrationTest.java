@@ -9,10 +9,11 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
+import org.junit.jupiter.api.Tag;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Tag("integration")
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class) // Гарантируем порядок выполнения
 public class PostgreSQLIntegrationTest {

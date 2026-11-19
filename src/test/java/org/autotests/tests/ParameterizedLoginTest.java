@@ -2,52 +2,26 @@ package org.autotests.tests;
 
 import io.qameta.allure.*;
 import org.autotests.pages.LoginPage;
-import org.autotests.utils.ScreenshotExtension;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ExtendWith(ScreenshotExtension.class)
 @Epic("E-commerce")
 @Feature("Аутентификация")
-public class ParameterizedLoginTest {
+public class ParameterizedLoginTest extends BaseTest {   // <-- extends BaseTest
 
-    WebDriver driver;
     LoginPage loginPage;
 
+    /**
+     * driver уже создан в BaseTest.setUpDriver() (родительский @BeforeEach
+     * выполняется раньше дочернего), поэтому здесь остаётся только
+     * инициализация Page Object.
+     */
     @BeforeEach
-    void setUp() {
-        ChromeOptions options = new ChromeOptions();
-
-        // Headless режим для GitHub Actions
-        options.addArguments("--headless=new");
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
-        options.addArguments("--disable-gpu");
-        options.addArguments("--window-size=1920,1080");
-
-        // Остальные аргументы
-        options.addArguments("--disable-save-password-bubble");
-        options.addArguments("--disable-features=PasswordManager,PasswordManagerRedesign");
-        options.addArguments("--disable-notifications");
-
-        driver = new ChromeDriver(options);
-        driver.manage().window().maximize();
+    void setUpPages() {
         loginPage = new LoginPage(driver);
-    }
-
-    @AfterEach
-    void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
     }
 
     @ParameterizedTest(name = "Вход: пользователь ''{0}'', ожидаемая ошибка: {2}")

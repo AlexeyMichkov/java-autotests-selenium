@@ -1,51 +1,45 @@
 package org.autotests.pages;
 
-import org.openqa.selenium.support.ui.WebDriverWait;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import java.time.Duration;
+import org.autotests.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 public class InventoryPage {
 
-    private WebDriver driver;
+    private final WebDriver driver;
 
     // Локаторы
-    private By pageTitle = By.className("title");
-    private By cartBadge = By.className("shopping_cart_badge");
-    private By cartLink = By.className("shopping_cart_link");
-    private By addToCartBackpack = By.id("add-to-cart-sauce-labs-backpack");
-    private By addToCartBikeLight = By.id("add-to-cart-sauce-labs-bike-light");
+    private final By pageTitle = By.className("title");
+    private final By cartBadge = By.className("shopping_cart_badge");
+    private final By cartLink = By.className("shopping_cart_link");
+    private final By addToCartBackpack = By.id("add-to-cart-sauce-labs-backpack");
+    private final By addToCartBikeLight = By.id("add-to-cart-sauce-labs-bike-light");
 
     // Конструктор
     public InventoryPage(WebDriver driver) {
         this.driver = driver;
     }
 
-    // Методы
+    // Методы с использованием WaitUtils
     public String getPageTitle() {
-        return driver.findElement(pageTitle).getText();
+        return WaitUtils.getTextWhenVisible(driver, pageTitle);
     }
 
     public String getCartBadgeText() {
-        return driver.findElement(cartBadge).getText();
+        return WaitUtils.getTextWhenVisible(driver, cartBadge);
     }
 
     public void addToCartBackpack() {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        wait.until(ExpectedConditions.elementToBeClickable(By.id("add-to-cart-sauce-labs-backpack")));
-        driver.findElement(By.id("add-to-cart-sauce-labs-backpack")).click();
+        WaitUtils.clickWhenReady(driver, addToCartBackpack);
     }
 
     public void addToCartBikeLight() {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        wait.until(ExpectedConditions.elementToBeClickable(By.id("add-to-cart-sauce-labs-bike-light")));
-        driver.findElement(By.id("add-to-cart-sauce-labs-bike-light")).click();
+        WaitUtils.clickWhenReady(driver, addToCartBikeLight);
     }
 
     // Переход в корзину — возвращает объект CartPage
     public CartPage goToCart() {
-        driver.findElement(cartLink).click();
+        WaitUtils.clickWhenReady(driver, cartLink);
         return new CartPage(driver);
     }
 }

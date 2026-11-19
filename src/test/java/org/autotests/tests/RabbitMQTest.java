@@ -6,7 +6,7 @@ import org.junit.jupiter.api.*;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
-
+import org.junit.jupiter.api.Tag;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -18,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * 3. Получение сообщения (Consumer)
  * 4. Корректность данных
  */
+@Tag("integration")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class RabbitMQTest {
 
