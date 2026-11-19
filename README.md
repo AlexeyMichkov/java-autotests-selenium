@@ -1,15 +1,19 @@
-# 🤖 Java AutoTests - Selenium + Playwright + API Testing
+# 🤖 Java AutoTests — Selenium + Playwright + API Testing
 
-Автоматизированный фреймворк для тестирования веб-приложений и API, разработанный на Java. Проект демонстрирует современные подходы к автоматизации тестирования, включая UI-тесты, API-тесты, работу с базами данных и интеграцию с CI/CD.
+Автоматизированный фреймворк для тестирования веб-приложений и API на Java. Проект демонстрирует современные подходы к автоматизации: UI-тесты, API-тесты, работу с базами данных, интеграционные тесты в контейнерах и публикацию отчётов в CI/CD.
+
+> 💡 **Про вайб-кодинг.** Проект собран в связке с ИИ-агентом (Qwen Coding Agent), но с **жёстким человеческим code-review**. Это практический кейс о том, как использовать ИИ для генерации бойлерплейта, ловить его «галлюцинации» и доводить архитектуру до enterprise-уровня. Полная история — в [посте на Setka.ru](#) *(вставьте ссылку после публикации)*.
+
+---
 
 ## 🛠 Технологии и стек
 
-### UI Тестирование
+### UI-тестирование
 - **Selenium WebDriver 4.27.0** — автоматизация браузера
-- **Playwright 1.40.0** — современная альтернатива Selenium
+- **Playwright 1.40.0** — современная альтернатива Selenium (отдельный набор тестов)
 - **Page Object Model (POM)** — паттерн проектирования для организации тестов
 
-### API Тестирование
+### API-тестирование
 - **RestAssured 5.4.0** — тестирование REST API
 - **Jackson 2.17.0** — работа с JSON
 
@@ -24,124 +28,86 @@
 - **RabbitMQ** — тестирование асинхронных сообщений
 
 ### Отчётность и CI/CD
-- **Allure 2.25.0** — красивые отчёты о тестах
-- **JUnit 5** — фреймворк для тестов
-- **AssertJ** — удобные ассерты
-- **GitHub Actions** — автоматический запуск тестов в CI/CD
+- **Allure 2.25.0** — интерактивные отчёты о тестах
+- **JUnit 5 (Jupiter) 5.10.2** — тест-фреймворк
+- **Maven** — сборка и запуск
+- **GitHub Actions + GitHub Pages** — прогон тестов и автопубликация Allure-отчёта
+- **Java 17**
 
-## 📁 Структура проекта
+---
 
-*📂 pages/** — Page Object классы для Selenium
-- CartPage.java
-- CheckoutPage.java  
-- InventoryPage.java
-- LoginPage.java
+## 🏗 Архитектура и ключевые решения
 
-**📂 playwright/** — Playwright тесты
-- pages/LoginPagePlaywright.java
-- tests/PlaywrightLoginTest.java
+Это не набор скриптов, а фреймворк с продуманной архитектурой:
 
-**📂 tests/** — Тестовые классы
-- AdvancedLocatorsTest.java
-- ApiPostsTest.java
-- CartTest.java
-- DatabaseTest.java
-- H2DatabaseTest.java ✅
-- PostgreSQLIntegrationTest.java ✅
-- RabbitMQTest.java ✅
-- ParameterizedLoginTest.java
+1. **Централизованный `BaseTest`** — вынес ~50 строк настройки `ChromeOptions` и `WebDriver` из каждого теста в базовый класс. Единый механизм headless/headed через системное свойство `headed`.
+2. **Надёжные скриншоты падений** — реализованы через JUnit 5 `TestExecutionExceptionHandler` (шаг 10 lifecycle, **гарантированно выполняется до `@AfterEach`**, пока браузер жив). Это принципиально надёжнее `TestWatcher`, порядок которого относительно teardown не гарантирован.
+3. **Умные ожидания `WaitUtils`** — заменяют хрупкие `Thread.sleep()` и «голые» `findElement()` на явные ожидания. Вместо обезличенного `TimeoutException` бросают `AssertionError` с человекочитаемым сообщением («Элемент [...] так и не стал кликабельным за 10 сек.»), которое попадает прямо в Allure-отчёт.
+4. **Изоляция интеграционных тестов** — тяжёлые тесты (PostgreSQL, RabbitMQ) помечены `@Tag("integration")` и исключены из дефолтного прогона через `maven-surefire-plugin` (`excludedGroups`). Локальный `mvn test` пролетает быстро и всегда зелёный; в CI интеграционные тесты идут отдельным джобом с Docker.
+5. **Self-check скриншотов** — отдельный тест `FailureScreenshotSmokeTest` (`@Disabled`), который доказывает, что интеграция скриншотов реально работает (зелёный прогон сам по себе этого не подтверждает).
 
-**📂 utils/** — Утилиты
-- DbHelper.java ✅ (SQL-помощник для работы с БД)
-- ScreenshotExtension.java
-- ScreenshotUtils.java
+---
 
-## 🚀 Как запустить тесты
+## 🚀 Как запустить
 
-### Предварительные требования
-- Java 17+
+### 1. Предварительные требования
+- JDK 17+
 - Maven 3.6+
-- Docker Desktop (для Testcontainers тестов)
+- Docker Desktop — **опционально**, нужен только для интеграционных тестов
 
-### Запуск всех тестов
+### 2. UI и API тесты (по умолчанию, headless)
+Быстрый прогон, подходит для локальной разработки и CI:
 ```bash
 mvn clean test
+```
 
-**Запуск в headless режиме (без окна браузера)**
-mvn test -P headless
+### 3. Тесты с видимым браузером (headed)
+Для отладки и визуальной проверки:
+```bash
+mvn clean test -P headed
+```
 
-**Запуск только H2 Database тестов**
-mvn test -Dtest=H2DatabaseTest
+### 4. Интеграционные тесты (нужен Docker)
+Прогон PostgreSQL и RabbitMQ на Testcontainers:
+```bash
+mvn clean test -Dgroups=integration
+```
 
-**Генерация Allure отчёта**
+### 5. Сгенерировать и открыть Allure-отчёт
+```bash
 mvn allure:serve
+```
 
-✨ Ключевые особенности
-🗄 Database Verification Pattern
-Проект демонстрирует паттерн проверки данных напрямую в базе данных:
-// Пример: проверка через SQL после действия в приложении
-int countAfter = dbHelper.getCount("SELECT COUNT(*) FROM users");
-assertEquals(1, countAfter, "Пользователь должен быть сохранён в БД");
+### 6. Онлайн-отчёт (публикуется автоматически через GitHub Pages)
+Актуальный Allure-отчёт с последнего прогона CI доступен по адресу:
+```
+https://AlexeyMichkov.github.io/java-autotests-selenium/
+```
+*(точный URL продублирован во вкладке **Deployments → github-pages** репозитория)*
 
-Преимущества:
-Проверка целостности данных на уровне БД, а не только UI/API
-Ловит баги, когда API возвращает 200 OK, но данные не сохранились
-Поддержка H2 (быстрые unit-тесты) и PostgreSQL (интеграционные тесты)
+---
 
-🧪 Изоляция тестов
-Каждый тест работает с уникальной базой данных, что гарантирует независимость тестов друг от друга.
+## 📂 Структура проекта
 
-📊 Allure отчёты
- Красивые интерактивные отчёты с:
-- Скриншотами при падении тестов
-- Логами запросов и ответов
-- Параметризацией тестов
-- Epic/Feature/Story разметкой
+```text
+src/test/java/org/autotests/
+├── pages/          # Page Object Model (LoginPage, InventoryPage, CartPage, CheckoutPage)
+├── tests/          # UI, API и интеграционные тесты (Selenium + JUnit 5)
+├── playwright/     # Отдельный набор тестов на Playwright
+├── utils/          # Помощники: WaitUtils, DbHelper, ScreenshotUtils
+└── resources/      # Тестовые данные и конфигурации
+.github/            # Конфигурация GitHub Actions (CI/CD)
+```
 
-🔄 CI/CD интеграция
-Автоматический запуск тестов при каждом push через GitHub Actions с публикацией Allure отчётов на GitHub Pages.
+---
 
-📚 Примеры тестов
-- H2 Database Test:
+## 🎯 Чему я научился и что улучшил в проекте
 
-@Test
-public void testInsertAndVerifyWithSQL() {
-    // Вставка данных
-    dbHelper.executeUpdate(
-        "INSERT INTO users (first_name, last_name, email) " +
-        "VALUES ('Alexey', 'Michkov', 'alexey@test.com')"
-    );
-    
-    // Проверка через SQL
-    int count = dbHelper.getCount("SELECT COUNT(*) FROM users");
-    assertEquals(1, count);
-}
+- **Ревью ИИ-кода.** Поймал два критичных бага, которые не поймали «зелёные» тесты: агент рапортовал «исправлено», не меняя код (лечилось требованием показывать `git diff`), и использовал `TestWatcher`, из-за которого скриншот падения не прикладывался бы никогда. Научился сверять не отчёт, а diff и lifecycle фреймворка.
+- **Lifecycle JUnit 5.** Глубже разобрал порядок вызовов `TestExecutionExceptionHandler` → `@AfterEach` → `TestWatcher` и понял, почему выбор расширения важен для стабильности.
+- **Разделение слоёв тестов.** Освоил `@Tag` + `excludedGroups` в Surefire, чтобы отделить быстрые UI/API-тесты от медленных контейнерных интеграционных.
+- **Устранение антипаттернов.** Убрал `Thread.sleep()` и рефлексию за поиском `driver`, заменив их на явные ожидания и штатные механизмы JUnit.
 
-- API Test с RestAssured:
+---
 
-@Test
-public void testCreatePost() {
-    given()
-        .contentType("application/json")
-        .body("{\"title\": \"Test\", \"body\": \"Content\", \"userId\": 1}")
-    .when()
-        .post("/posts")
-    .then()
-        .statusCode(201);
-}
-
-🎯 Цель проекта
-- Этот проект создан для:
-- Демонстрации навыков автоматизации тестирования
-- Изучения современных инструментов (Playwright, Testcontainers, RestAssured)
-- Практики паттернов проектирования (Page Object Model)
-- Интеграции с CI/CD и системами отчётности
-
-👨‍💻 Автор
-Алексей Мичков
-Email: [michkov.imperial@gmail.com]
-LinkedIn: [https://www.linkedin.com/in/%D0%B0%D0%BB%D0%B5%D0%BA%D1%81%D0%B5%D0%B9-%D0%BC%D0%B8%D1%87%D0%BA%D0%BE%D0%B2-4b9056252/]
-Резюме: https://perm.hh.ru/resume/d97d56c0ff0cba3e400039ed1f786f62555047
-
-📄 Лицензия
-MIT License
+*Проект собран с ❤️ и строгим code-review — [Alexey Michkov](https://github.com/AlexeyMichkov)*
